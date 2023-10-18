@@ -14,7 +14,9 @@ let server = http.createServer( (req,res) => {
             let site = fs.readFileSync("./views/index.html");
             res.writeHead(200, {"Content-Type" : "text/html"});
             res.end(site);
+            console.log("chuj")
             break;
+
         }
         case "login":
         {
