@@ -37,6 +37,51 @@ let server = http.createServer( (req,res) => {
             res.end(site);
             break;
         }
+        case "signIn": {
+            let formdata = "";
+                req.on("data", (chunk) => {
+                    formdata += chunk.toString();
+                });
+                req.on("end",()=>{
+                    let parsed = parser.parse(formdata);
+                    console.log(parsed);
+
+                    let connection = mysql.createConnection({
+                        host: "localhost",
+                        user: "root",
+                        password: "",
+                        database: "project"
+                    });  
+
+                    connection.connect( (err) => {
+                        let sql_query = "select count(user_login) as howMany from users where user_login='"+parsed.login+"'";
+                        connection.query(sql_query, (err,result,fields) =>{
+                            console.log(result[0].howMany)
+                            if(result[0].howMany == 0)
+                            {
+                                res.writeHead(200, {"Content-Type" : "text/html"});
+                                let site = fs.readFileSync("./views/registerPage.html").toString();
+                               
+                                res.end(site);
+                            }
+                            else
+                            {
+                                res.writeHead(200, {"Content-Type" : "text/html"});
+                                let site = fs.readFileSync("./views/registerPage.html").toString();
+                                // site = site.replace("{{modal}}",'')
+                                res.end(site);
+                            }
+                            
+                            
+                        });
+
+                    });
+                });
+
+                
+
+                break;
+        }
         case "products":{}
         case "delivery":{}
         case "contact":{}
