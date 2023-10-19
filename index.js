@@ -14,17 +14,28 @@ let server = http.createServer( (req,res) => {
             let site = fs.readFileSync("./views/index.html");
             res.writeHead(200, {"Content-Type" : "text/html"});
             res.end(site);
-            console.log("chuj")
             break;
-
+        }
+        case "style.css":
+        {
+            let style = fs.readFileSync("./views/style.css");
+            res.writeHead(200, {"Content-Type" : "text/css"});
+            res.end(style);
+            break;
         }
         case "login":
         {
-
+            let site = fs.readFileSync("./views/loginPage.html");
+            res.writeHead(200, {"Content-Type" : "text/html"});
+            res.end(site);
+            break;
         }
         case "register":
         {
-
+            let site = fs.readFileSync("./views/registerPage.html");
+            res.writeHead(200, {"Content-Type" : "text/html"});
+            res.end(site);
+            break;
         }
         case "products":{}
         case "delivery":{}
