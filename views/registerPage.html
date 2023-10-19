@@ -57,19 +57,19 @@
   <form action="/signIn" method="post">
   <div class="container-fluid" id="loginForm">
     <div class="form-floating mb-3">
-        <input type="text" class="form-control" name="login" placeholder="name@example.com">
+        <input type="text" required="required" class="form-control" name="login" placeholder="name@example.com">
         <label for="floatingInput">Username</label>
       </div>
       <div class="form-floating">
-        <input type="password" class="form-control" name="password" placeholder="Password">
+        <input type="password" required="required"  class="form-control" name="password" placeholder="Password">
         <label for="floatingPassword">Password</label>
       </div>
       <div class="form-floating" style="margin-top:20px">
-        <input type="password" class="form-control" name="confirm_password" placeholder="Confirm assword">
+        <input type="password" required="required"  class="form-control" name="confirm_password" placeholder="Confirm assword">
         <label for="floatingPassword">Confirm password</label>
       </div>
       <div class="form-check" style="margin-top:20px">
-        <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
+        <input class="form-check-input" required="required" type="checkbox" value="" id="flexCheckDefault">
         <label class="form-check-label" for="flexCheckDefault">
           Accept <a href="">User Agreement & User Privacy Notice</a>
         </label>
