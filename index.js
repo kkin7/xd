@@ -44,7 +44,7 @@ let server = http.createServer( (req,res) => {
                 });
                 req.on("end",()=>{
                     let parsed = parser.parse(formdata);
-                    console.log(parsed);
+                    console.log(parsed.login,parsed.password);
 
                     let connection = mysql.createConnection({
                         host: "localhost",
@@ -54,27 +54,44 @@ let server = http.createServer( (req,res) => {
                     });  
 
                     connection.connect( (err) => {
-                        let sql_query = "select count(user_login) as howMany from users where user_login='"+parsed.login+"'";
-                        connection.query(sql_query, (err,result,fields) =>{
-                            console.log(result[0].howMany)
-                            if(result[0].howMany == 0)
-                            {
-                                res.writeHead(200, {"Content-Type" : "text/html"});
-                                let site = fs.readFileSync("./views/registerPage.html").toString();
-                               
-                                res.end(site);
-                            }
-                            else
-                            {
-                                res.writeHead(200, {"Content-Type" : "text/html"});
-                                let site = fs.readFileSync("./views/registerPage.html").toString();
-                                // site = site.replace("{{modal}}",'')
-                                res.end(site);
-                            }
-                            
-                            
-                        });
-
+                        if(parsed.password != parsed.confirm_password)
+                        {
+                            res.writeHead(200, {"Content-Type" : "text/html"});
+                            let site = fs.readFileSync("./views/registerPage.html").toString();
+                            site = site.replace("{{modal}}",'<script>alert("Passwords are different")</script>')
+                            res.end(site);
+                        }
+                        else
+                        {
+                            let query_checklogin = "select count(user_login) as howMany from users where user_login='"+parsed.login+"'";
+                            connection.query(query_checklogin, (err,result,fields) => {
+                                console.log(result[0].howMany)
+                                if(result[0].howMany == 0)
+                                {
+                                   
+                                    let sql_insert = "insert users values ('', '"+parsed.login+"', '"+parsed.password+"');"
+                                    connection.query(sql_insert, (err,result,fields) => {
+                                        if(result)
+                                        {
+                                            res.writeHead(200, {"Content-Type" : "text/html"});
+                                            let site = fs.readFileSync("./views/registerPage.html").toString();
+                                            site = site.replace("{{modal}}",'<script>alert("Successfully registered!")</script>')
+                                            res.end(site);
+                                        }
+                                    });
+                                    
+                                }
+                                else
+                                {
+                                    res.writeHead(200, {"Content-Type" : "text/html"});
+                                    let site = fs.readFileSync("./views/registerPage.html").toString();
+                                    site = site.replace("{{modal}}",'<script>alert("Username already exists!")</script>')
+                                    res.end(site);
+                                }
+                                
+                                
+                            });
+                        }
                     });
                 });
 
