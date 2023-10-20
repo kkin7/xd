@@ -37,6 +37,7 @@ let server = http.createServer((req, res) => {
                 break;
             }
         case "signIn": {
+            console.log("ss")
             let formdata = "";
             req.on("data", (chunk) => {
                 formdata += chunk.toString();
@@ -88,19 +89,18 @@ let server = http.createServer((req, res) => {
                     }
                 });
             });
-
-
-
             break;
         }
         case "signUp": {
             let formdata = "";
+            console.log("ssss")
             req.on("data", (chunk) => {
                 formdata += chunk.toString();
             });
             req.on("end", () => {
                 let parsed = parser.parse(formdata);
                 console.log(parsed);
+                console.log("aa");
 
                 let connection = mysql.createConnection({
                     host: "localhost",
@@ -120,8 +120,7 @@ let server = http.createServer((req, res) => {
                             res.end(site);
                         }
                         else
-                        {
-                            
+                        { 
                             let site = fs.readFileSync("./views/loginPage.html").toString();
                             site = site.replace("{{modal}}", '<script>alert("Successfully log!")</script>');
                             res.writeHead(200, { "Content-Type": "text/html" });
@@ -130,6 +129,7 @@ let server = http.createServer((req, res) => {
                     });
                 });
             })
+            break;
         }
         case "products": { }
         case "delivery": { }
