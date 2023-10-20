@@ -23,10 +23,7 @@
             placeholder="Search" aria-label="Search">
           <button class="btn btn-outline-dark" type="submit">Search</button>
         </form>
-        <div class="login">
-          <a class="nav-link" href="login" style="margin: 5px; ">Sign up</a>
-          <a class="nav-link" href="register" style="margin: 5px;">Sign in</a>
-        </div>
+        {{menu}}
       </div>
     </nav>
 
@@ -40,6 +37,7 @@
         <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
           <div class="navbar-nav" style="margin-top: 10px; align-items: center;">
             <select class="form-select" id="menubutton" aria-label="" style="width: 300px;">
+              <!-- {{select}} -->
               <option selected>Categories</option>
               <option value="1">One</option>
               <option value="2">Two</option>

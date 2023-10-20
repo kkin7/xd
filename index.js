@@ -2,7 +2,8 @@ const http = require("http");
 const fs = require("fs");
 const parser = require("querystring");
 const mysql = require("mysql");
-
+let logStatus = 0; // 1 log, 0 logout
+let userID = 0;
 let server = http.createServer((req, res) => {
     const log = 0;
     let url = req.url.toString().substring(1).split("/");
@@ -10,11 +11,29 @@ let server = http.createServer((req, res) => {
     switch (url[0]) {
         case "": //HOME
             {
-                let site = fs.readFileSync("./views/index.html");
+                let site = fs.readFileSync("./views/index.html").toString();
+                if(logStatus==1)
+                {
+                    site = site.replace("{{menu}}",'<a href="/vusketPage.html"><svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-basket2-fill" viewBox="0 0 16 16"><path d="M5.929 1.757a.5.5 0 1 0-.858-.514L2.217 6H.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h.623l1.844 6.456A.75.75 0 0 0 3.69 15h8.622a.75.75 0 0 0 .722-.544L14.877 8h.623a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1.717L10.93 1.243a.5.5 0 1 0-.858.514L12.617 6H3.383L5.93 1.757zM4 10a1 1 0 0 1 2 0v2a1 1 0 1 1-2 0v-2zm3 0a1 1 0 0 1 2 0v2a1 1 0 1 1-2 0v-2zm4-1a1 1 0 0 1 1 1v2a1 1 0 1 1-2 0v-2a1 1 0 0 1 1-1z"/></svg></a><a class="nav-link" href="/logout" style="margin: 5px;">Logout</a>')
+                }
+                else
+                {  
+                    site = site.replace("{{menu}}",'<div class="login"><a class="nav-link" href="login" style="margin: 5px; ">Sign up</a><a class="nav-link" href="register" style="margin: 5px;">Sign in</a></div>');
+                    
+                }
                 res.writeHead(200, { "Content-Type": "text/html" });
                 res.end(site);
                 break;
+                
             }
+        case "logout": {
+            logStatus = 0
+            let site = fs.readFileSync("./views/index.html").toString();
+            site = site.replace("{{menu}}",'<script>alert("Logged out successfully")</script><div class="login"><a class="nav-link" href="login" style="margin: 5px; ">Sign up</a><a class="nav-link" href="register" style="margin: 5px;">Sign in</a></div>');
+            res.writeHead(200, { "Content-Type": "text/html" });
+            res.end(site);
+            break;
+        }
         case "style.css":
             {
                 let style = fs.readFileSync("./views/style.css");
@@ -37,7 +56,6 @@ let server = http.createServer((req, res) => {
                 break;
             }
         case "signIn": {
-            console.log("ss")
             let formdata = "";
             req.on("data", (chunk) => {
                 formdata += chunk.toString();
@@ -71,7 +89,7 @@ let server = http.createServer((req, res) => {
                                     if (result) {
                                         res.writeHead(200, { "Content-Type": "text/html" });
                                         let site = fs.readFileSync("./views/registerPage.html").toString();
-                                        site = site.replace("{{modal}}", '<script>alert("Successfully registered!")</script>')
+                                        site = site.replace("{{modal}}", '<script>alert("Successfully registered!\nNow you can log in")</script>')
                                         res.end(site);
                                     }
                                 });
@@ -110,7 +128,7 @@ let server = http.createServer((req, res) => {
                 });
 
                 connection.connect((err) => {
-                    let query_checklogdata = "select count(user_login) as howmany from users where user_login='"+parsed.login+"' and user_password = '"+parsed.password+"'"
+                    let query_checklogdata = "select user_id, count(user_login) as howmany from users where user_login='"+parsed.login+"' and user_password = '"+parsed.password+"'"
                     connection.query(query_checklogdata,(err, result, field) => {
                         if (result[0].howmany == 0) {
                             
@@ -121,6 +139,8 @@ let server = http.createServer((req, res) => {
                         }
                         else
                         { 
+                            logStatus = 1;
+                            userID = result[0].user_id;
                             let site = fs.readFileSync("./views/loginPage.html").toString();
                             site = site.replace("{{modal}}", '<script>alert("Successfully log!")</script>');
                             res.writeHead(200, { "Content-Type": "text/html" });
@@ -131,7 +151,39 @@ let server = http.createServer((req, res) => {
             })
             break;
         }
-        case "products": { }
+        case "products": {
+            let site = fs.readFileSync("./views/productsListPage.html").toString();
+            let text = "";
+            let connection = mysql.createConnection({
+                host: "localhost",
+                user: "root",
+                password: "",
+                database: "project"
+            });
+            connection.connect((err) =>{
+                let query_selectProducts = "select product_name, product_price, product_description, product_image from products";
+                connection.query(query_selectProducts, (err, result, fields) => {
+                    var index = 1;
+                    text ='<div class="row" style="margin-top: 50px">'
+                    result.forEach(element => {
+                        
+                        text += '<div class="col"><div class="card" style="width: 18rem;"><img src="/images/'+element.product_image+'" class="card-img-top" style="padding: 15px" alt="..."><div class="card-body"><h5 class="card-title">'+element.product_name+'</h5><p class="card-text">'+element.product_description+'</p><a href="#" class="btn btn-primary">Add to cart</a><p style="float:right; margin-right: 40px;">'+element.product_price+'</p></div></div></div>';
+                        index++;
+                        if(index == 6)
+                        {
+                            text+='</div><div class="row" style="margin-top: 50px">'
+                            index = 1;
+                        }                        
+                    });
+                    text+='</div>'
+                    site = site.replace("{{cards}}",text); 
+                    res.writeHead(200, {"Content-Type":"text/html"});
+                    res.end(site);
+                });
+            });
+            
+            break;
+         }
         case "delivery": { }
         case "contact": { }
         case "about_us": { }
@@ -143,40 +195,13 @@ let server = http.createServer((req, res) => {
                 res.end(image, 'binary');
                 break;
             }
+        default: {
+            let site = fs.readFileSync("./views/error.html");
+            res.writeHead(200, { "Content-Type": "text/html" });
+            res.end(site);
+            break;
+        }
     }
-    /*
-       
-    case "add_user":
-            {
-                let formdata = "";
-                req.on("data", (chunk) => {
-                    formdata += chunk.toString();
-                });
-                req.on("end",()=>{
-                    let parsed = parser.parse(formdata);
-                    console.log(parsed);
-
-                    let connection = mysql.createConnection({
-                        host: "localhost",
-                        user: "root",
-                        password: "",
-                        database: "users"
-                    });  
-
-                    connection.connect( (err) => {
-                        let sql_query = "insert into students values ('','"+parsed.user_fname+"','"+parsed.user_lname+"',"+parsed.user_age+")";
-                        connection.query(sql_query, (err,result,fields) =>{
-                            res.writeHead(200, {"Content-Type" : "text/html"});
-                            res.end("Dodawno")
-                        });
-
-                    });
-                });
-
-                
-
-                break;
-            }*/
 });
 
 server.listen(8000, () => {
