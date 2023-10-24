@@ -164,14 +164,14 @@ let server = http.createServer((req, res) => {
                 let query_selectProducts = "select product_name, product_price, product_description, product_image from products";
                 connection.query(query_selectProducts, (err, result, fields) => {
                     var index = 1;
-                    text ='<div class="row" style="margin-top: 50px">'
+                    text ='<div class="row center-mobile" style="margin-top: 50px">'
                     result.forEach(element => {
                         
-                        text += '<div class="col"><div class="card" style="width: 18rem;"><img src="/images/'+element.product_image+'" class="card-img-top" style="padding: 15px" alt="..."><div class="card-body"><h5 class="card-title">'+element.product_name+'</h5><p class="card-text">'+element.product_description+'</p><a href="#" class="btn btn-primary">Add to cart</a><p style="float:right; margin-right: 40px;">'+element.product_price+'</p></div></div></div>';
+                        text += '<div class="col"><div class="card center-mobile" style="width: 18rem;"><img src="/images/'+element.product_image+'" class="card-img-top" style="padding: 15px" alt="..."><div class="card-body"><h5 class="card-title">'+element.product_name+'</h5><p class="card-text">'+element.product_description+'</p><a href="#" class="btn btn-primary">Add to cart</a><p style="float:right; margin-right: 40px;">'+element.product_price+'</p></div></div></div>';
                         index++;
                         if(index == 6)
                         {
-                            text+='</div><div class="row" style="margin-top: 50px">'
+                            text+='</div><div class="row center-mobile" style="margin-top: 50px">'
                             index = 1;
                         }                        
                     });
