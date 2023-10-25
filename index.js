@@ -13,8 +13,6 @@ const connection = mysql.createConnection({
     password: "",
     database: "project"
 });
-
-
 async function selectContent() {
     
     let query_category = "select DISTINCT product_category from products"
