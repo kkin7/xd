@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Home Page</title>
+  <title>Products List</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
     integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
   <link rel="stylesheet" href="style.css">
@@ -37,11 +37,8 @@
         <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
           <div class="navbar-nav" style="margin-top: 10px; align-items: center;">
             <select class="form-select" id="menubutton" aria-label="" style="width: 300px;">
-              <!-- {{select}} -->
               <option selected>Categories</option>
-              <option value="1">One</option>
-              <option value="2">Two</option>
-              <option value="3">Three</option>
+              {{select}}
             </select>
             <a class="nav-link" id="menubutton" href="/products">Products</a>
             <a class="nav-link" id="menubutton" href="/delivery">Delivery</a>

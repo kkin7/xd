@@ -2,9 +2,38 @@ const http = require("http");
 const fs = require("fs");
 const parser = require("querystring");
 const mysql = require("mysql");
+const { resolve } = require("path");
 let logStatus = 0; // 1 log, 0 logout
 let userID = 0;
-let server = http.createServer((req, res) => {
+let select = ""
+
+const connection = mysql.createConnection({
+    host: "localhost",
+    user: "root",
+    password: "",
+    database: "project"
+});
+
+
+async function selectContent() {
+    
+    let query_category = "select DISTINCT product_category from products"
+    
+    return new Promise((resolve, reject) => {
+        connection.query(query_category, (err, result, field) => { 
+            let text = "" 
+            console.info('result of selectContent', result)
+            let index = 1;
+            result.forEach(element => {
+                text += '<option value="Category'+index+'">'+element.product_category+'</option>';
+                index++;
+            })
+            resolve(text);
+        });
+    });
+};
+
+let server = http.createServer(async (req, res) => {
     const log = 0;
     let url = req.url.toString().substring(1).split("/");
     console.log(url);
@@ -64,13 +93,6 @@ let server = http.createServer((req, res) => {
                 let parsed = parser.parse(formdata);
                 console.log(parsed);
 
-                let connection = mysql.createConnection({
-                    host: "localhost",
-                    user: "root",
-                    password: "",
-                    database: "project"
-                });
-
                 connection.connect((err) => {
                     if (parsed.password != parsed.confirm_password) {
                         res.writeHead(200, { "Content-Type": "text/html" });
@@ -120,12 +142,7 @@ let server = http.createServer((req, res) => {
                 console.log(parsed);
                 console.log("aa");
 
-                let connection = mysql.createConnection({
-                    host: "localhost",
-                    user: "root",
-                    password: "",
-                    database: "project"
-                });
+               
 
                 connection.connect((err) => {
                     let query_checklogdata = "select user_id, count(user_login) as howmany from users where user_login='"+parsed.login+"' and user_password = '"+parsed.password+"'"
@@ -151,21 +168,27 @@ let server = http.createServer((req, res) => {
             })
             break;
         }
-        case "products": {
+        case "category": {
             let site = fs.readFileSync("./views/productsListPage.html").toString();
-            let text = "";
-            let connection = mysql.createConnection({
-                host: "localhost",
-                user: "root",
-                password: "",
-                database: "project"
+            let received = "" 
+            req.on("data", (chunk) => {
+                received += chunk.toString();
             });
-            connection.connect((err) =>{
-                let query_selectProducts = "select product_name, product_price, product_description, product_image from products";
-                connection.query(query_selectProducts, (err, result, fields) => {
-                    var index = 1;
+
+            req.on("end", () => {
+                console.log(received);
+                var text = ""
+                //ogarnąć kategorię
+                let temp = received.substring(0,received.length-2)
+                temp += " " + received[received.length-2]
+                console.log(temp)
+                
+                connection.connect( (err) => {
+                    let query_selectCategory = "select product_name, product_price, product_description, product_image from products where product_category = '"+temp+"'";
+                    connection.query(query_selectCategory,  (err, result, fields) => {
+                        var index = 1;
                     text ='<div class="row center-mobile" style="margin-top: 50px">'
-                    result.forEach(element => {
+                    result.forEach( element => {
                         
                         text += '<div class="col"><div class="card center-mobile" style="width: 18rem;"><img src="/images/'+element.product_image+'" class="card-img-top" style="padding: 15px" alt="..."><div class="card-body"><h5 class="card-title">'+element.product_name+'</h5><p class="card-text">'+element.product_description+'</p><a href="#" class="btn btn-primary">Add to cart</a><p style="float:right; margin-right: 40px;">'+element.product_price+'</p></div></div></div>';
                         index++;
@@ -176,9 +199,43 @@ let server = http.createServer((req, res) => {
                         }                        
                     });
                     text+='</div>'
-                    site = site.replace("{{cards}}",text); 
+                    site = site.replace("{{cards}}",text);
                     res.writeHead(200, {"Content-Type":"text/html"});
                     res.end(site);
+                    });
+                });
+                
+            });
+            break;
+        }
+        case "products": {
+            
+            let site = fs.readFileSync("./views/productsListPage.html").toString();
+            let text = "";
+            connection.connect( (err) =>{
+                let query_selectProducts = "select product_name, product_price, product_description, product_image from products";
+                connection.query(query_selectProducts,  (err, result, fields) => {
+                    var index = 1;
+                    text ='<div class="row center-mobile" style="margin-top: 50px">'
+                    result.forEach( element => {
+                        
+                        text += '<div class="col"><div class="card center-mobile" style="width: 18rem;"><img src="/images/'+element.product_image+'" class="card-img-top" style="padding: 15px" alt="..."><div class="card-body"><h5 class="card-title">'+element.product_name+'</h5><p class="card-text">'+element.product_description+'</p><a href="#" class="btn btn-primary">Add to cart</a><p style="float:right; margin-right: 40px;">'+element.product_price+'</p></div></div></div>';
+                        index++;
+                        if(index == 6)
+                        {
+                            text+='</div><div class="row center-mobile" style="margin-top: 50px">'
+                            index = 1;
+                        }                        
+                    });
+                    text+='</div>'
+                    site = site.replace("{{cards}}",text);
+                    selectContent().then(v => {
+                       
+                        site = site.replace("{{select}}",v); 
+                        res.writeHead(200, {"Content-Type":"text/html"});
+                        res.end(site);
+                    })
+                   
                 });
             });
             

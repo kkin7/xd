@@ -25,6 +25,7 @@
         }
       }
     </style>
+    
 </head>
 
 <body>
@@ -53,12 +54,35 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
           <div class="navbar-nav" style="margin-top: 10px; align-items: center;">
-            <select class="form-select" id="menubutton" aria-label="" style="width: 300px;">
-              <option selected>Categories</option>
-              <option value="1">One</option>
-              <option value="2">Two</option>
-              <option value="3">Three</option>
-            </select>
+            <form action="" method="post" id="formselect">
+              <select class="form-select selectoption" id="menubutton" aria-label="" style="width: 300px;">
+                <option id="CatOption" value="all" selected>Categories</option>
+                {{select}}
+                
+              </select>
+              <script>
+                let formsel = document.getElementById('formselect');
+                
+                formsel.addEventListener('input', ()=>{
+                  let opt = document.querySelector('.selectoption');
+                  if(opt.value == "all")
+                  {
+                    formsel.action="products"
+                  }
+                  else
+                  {
+                    fetch("http://localhost:8000/category",{
+                    method: "POST",
+                    body: JSON.stringify(opt.value)
+                    }); 
+                    formsel.action="category"
+                  }
+                  formsel.submit();
+                });
+        
+            </script>
+            </form>
+            
             <a class="nav-link" id="menubutton" href="/products">Products</a>
             <a class="nav-link" id="menubutton" href="/delivery">Delivery</a>
             <a class="nav-link" id="menubutton" href="/contact">Contact</a>
