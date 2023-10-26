@@ -67,6 +67,7 @@
                 
                 formsel.addEventListener('input', ()=>{
                   let opt = document.querySelector('.selectoption');
+                  localStorage.setItem("currentCattegory", opt);
                   formsel.action="category"
                   formsel.submit();
                 });
