@@ -23,10 +23,7 @@
             placeholder="Search" aria-label="Search">
           <button class="btn btn-outline-dark" type="submit">Search</button>
         </form>
-        <div class="login">
-          <a class="nav-link" href="login" style="margin: 5px; ">Sign up</a>
-          <a class="nav-link" href="register" style="margin: 5px;">Sign in</a>
-        </div>
+        {{menu}}
       </div>
     </nav>
 
@@ -41,10 +38,18 @@
           <div class="navbar-nav" style="margin-top: 10px; align-items: center;">
             <select class="form-select" id="menubutton" aria-label="" style="width: 300px;">
               <option selected>Categories</option>
-              <option value="1">One</option>
-              <option value="2">Two</option>
-              <option value="3">Three</option>
+              {{select}}
             </select>
+            <script>
+              let formsel = document.getElementById('formselect');
+              
+              formsel.addEventListener('input', ()=>{
+                let opt = document.querySelector('.selectoption');
+                formsel.action="category"
+                formsel.submit();
+              });
+      
+          </script>
             <a class="nav-link" id="menubutton" href="/products">Products</a>
             <a class="nav-link" id="menubutton" href="/delivery">Delivery</a>
             <a class="nav-link" id="menubutton" href="/contact">Contact</a>
@@ -54,7 +59,7 @@
       </div>
     </nav>
   </div>
-
+  
 
   <footer class="py-3 my-4">
     <p class="text-center text-body-dark">© 2023 ShopName</p>

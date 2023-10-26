@@ -23,13 +23,11 @@
             placeholder="Search" aria-label="Search">
           <button class="btn btn-outline-dark" type="submit">Search</button>
         </form>
-        <div class="login">
-          <a class="nav-link" href="/login" style="margin: 5px; ">Sign up</a>
-          <a class="nav-link" href="/register" style="margin: 5px;">Sign in</a>
-        </div>
+        {{menu}}
       </div>
     </nav>
 
+    
     <nav class="navbar navbar-expand-lg bg-body-tertiary nav-underline">
       <div class="container-fluid" style="text-align: center;">
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup"
@@ -40,10 +38,18 @@
           <div class="navbar-nav" style="margin-top: 10px; align-items: center;">
             <select class="form-select" id="menubutton" aria-label="" style="width: 300px;">
               <option selected>Categories</option>
-              <option value="1">One</option>
-              <option value="2">Two</option>
-              <option value="3">Three</option>
+              {{select}}
             </select>
+            <script>
+              let formsel = document.getElementById('formselect');
+              
+              formsel.addEventListener('input', ()=>{
+                let opt = document.querySelector('.selectoption');
+                formsel.action="category"
+                formsel.submit();
+              });
+      
+          </script>
             <a class="nav-link" id="menubutton" href="/products">Products</a>
             <a class="nav-link" id="menubutton" href="/delivery">Delivery</a>
             <a class="nav-link" id="menubutton" href="/contact">Contact</a>
@@ -53,7 +59,7 @@
       </div>
     </nav>
   </div>
-  <form action="/signUp" method="post">
+  <form action="/signIn" method="post">
     <div class="container-fluid" id="loginForm">
       <div class="form-floating mb-3">
           <input type="text" required="required" class="form-control" name="login" placeholder="name@example.com">

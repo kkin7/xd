@@ -24,6 +24,10 @@
             margin: 10px auto;
         }
       }
+      h3 {
+        margin-left: 5%;
+        margin-top: 2%;
+      }
     </style>
     
 </head>
@@ -38,10 +42,7 @@
             placeholder="Search" aria-label="Search">
           <button class="btn btn-outline-dark" type="submit">Search</button>
         </form>
-        <div class="login">
-          <a class="nav-link" href="login" style="margin: 5px; ">Sign up</a>
-          <a class="nav-link" href="register" style="margin: 5px;">Sign in</a>
-        </div>
+        {{menu}}
       </div>
     </nav>
 
@@ -55,8 +56,9 @@
         <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
           <div class="navbar-nav" style="margin-top: 10px; align-items: center;">
             <form action="" method="post" id="formselect">
-              <select class="form-select selectoption" id="menubutton" aria-label="" style="width: 300px;">
-                <option id="CatOption" value="all" selected>Categories</option>
+              <select name="category" class="form-select selectoption" id="menubutton" aria-label="" style="width: 300px;">
+                <option value="" >Choose category</option>
+                <option value="all">All categories</option>
                 {{select}}
                 
               </select>
@@ -65,18 +67,7 @@
                 
                 formsel.addEventListener('input', ()=>{
                   let opt = document.querySelector('.selectoption');
-                  if(opt.value == "all")
-                  {
-                    formsel.action="products"
-                  }
-                  else
-                  {
-                    fetch("http://localhost:8000/category",{
-                    method: "POST",
-                    body: JSON.stringify(opt.value)
-                    }); 
-                    formsel.action="category"
-                  }
+                  formsel.action="category"
                   formsel.submit();
                 });
         
@@ -92,6 +83,7 @@
       </div>
     </nav>
   </div>
+    <h3>Filters: {{category}}</h3>
   <div id="container">
     {{cards}}
   </div>
