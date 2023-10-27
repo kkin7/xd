@@ -12,6 +12,18 @@ const connection = mysql.createConnection({
     password: "",
     database: "project"
 });
+function header()
+{
+    let content = '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>{{title}}</title><link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous"><link rel="stylesheet" href="style.css"><script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"crossorigin="anonymous"></script></head><body><div id="menu"><nav class="navbar bg-body-tertiary nav-underline"><div class="container-fluid"><a class="navbar-brand nav-underline nav-link" style="width: 8%; text-align: center;" href="/">ShopName</a><form method="post" action="search" class="d-flex" role="search" style="width: 50vw; margin-left: 30%;"><input name="search" class="form-control me-2" type="search" style="width: 50vw; margin-left: -40%; margin-right: 40%;"placeholder="Searched product name" aria-label="Search"><input class="btn btn-outline-dark" value="Search" type="submit"></input></form>{{menu}}</div></nav><nav class="navbar navbar-expand-lg bg-body-tertiary nav-underline"><div class="container-fluid" style="text-align: center;"><button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup"aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button><div class="collapse navbar-collapse" id="navbarNavAltMarkup"><div class="navbar-nav" style="margin-top: 10px; align-items: center;"><form action="" method="post" id="formselect"><select name="category" class="form-select selectoption" id="menubutton" aria-label="" style="width: 300px;"><option value="" >Choose category</option><option value="all">All categories</option>{{select}}</select><script>let formsel=document.getElementById("formselect");\nformsel.addEventListener("input",()=>{\nlet opt=document.querySelector(".selectoption");\nlocalStorage.setItem("currentCattegory", opt);\nformsel.action="category";formsel.submit();\n});\n</script></form><a class="nav-link" id="menubutton" href="/products">Products</a><a class="nav-link" id="menubutton" href="/delivery">Delivery</a><a class="nav-link" id="menubutton" href="/contact">Contact</a><a class="nav-link" id="menubutton" href="/about_us">About us</a></div></div></div></nav></div>';
+
+    return content;
+}
+function footer()
+{
+    var text = '<footer class="py-3 my-4"><p class="text-center text-body-dark">© 2023 ShopName</p></footer></body></html>';
+
+    return text
+}
 async function selectContent() {
 
     let query_category = "select DISTINCT product_category from products"
@@ -29,7 +41,7 @@ async function selectContent() {
         });
     });
 };
-function ifLogged(){
+function ifLogged() {
     if (logStatus == 1) {
         text = '<a href="/vusketPage.html"><svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-basket2-fill" viewBox="0 0 16 16"><path d="M5.929 1.757a.5.5 0 1 0-.858-.514L2.217 6H.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h.623l1.844 6.456A.75.75 0 0 0 3.69 15h8.622a.75.75 0 0 0 .722-.544L14.877 8h.623a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1.717L10.93 1.243a.5.5 0 1 0-.858.514L12.617 6H3.383L5.93 1.757zM4 10a1 1 0 0 1 2 0v2a1 1 0 1 1-2 0v-2zm3 0a1 1 0 0 1 2 0v2a1 1 0 1 1-2 0v-2zm4-1a1 1 0 0 1 1 1v2a1 1 0 1 1-2 0v-2a1 1 0 0 1 1-1z"/></svg></a><a class="nav-link" href="/logout" style="margin: 5px;">Logout</a>'
 
@@ -45,16 +57,22 @@ let server = http.createServer(async (req, res) => {
     let url = req.url.toString().substring(1).split("/");
     console.log(url);
     switch (url[0]) {
-        case "": //HOME
-            {
+        case "": /* + */ {
                 let site = fs.readFileSync("./views/index.html").toString();
-                site = site.replace("{{menu}}", ifLogged())
-                res.writeHead(200, { "Content-Type": "text/html" });
-                res.end(site);
-                break;
 
+                console.log(selectContent())
+                selectContent().then(v => {
+                    site = site.replace('{{header}}',header())
+                    site = site.replace('{{footer}}',footer())
+                    site = site.replace("{{title}}", "Home")
+                    site = site.replace("{{menu}}", ifLogged());
+                    site = site.replace("{{select}}", v);
+                    res.writeHead(200, { "Content-Type": "text/html" });
+                    res.end(site);
+                });
+                break;
             }
-        case "logout": {
+        case "logout": /* + */ {
             logStatus = 0
             let site = fs.readFileSync("./views/index.html").toString();
             site = site.replace("{{menu}}", '<script>alert("Logged out successfully")</script><div class="login"><a class="nav-link" href="login" style="margin: 5px; ">Sign in</a><a class="nav-link" href="register" style="margin: 5px;">Sign up</a></div>');
@@ -62,31 +80,42 @@ let server = http.createServer(async (req, res) => {
             res.end(site);
             break;
         }
-        case "style.css":
-            {
+        case "style.css": /* + */ {
                 let style = fs.readFileSync("./views/style.css");
                 res.writeHead(200, { "Content-Type": "text/css" });
                 res.end(style);
                 break;
             }
-        case "login":
-            {
+        case "login": /* + */ {
                 let site = fs.readFileSync("./views/loginPage.html").toString();
-                site = site.replace("{{select}}",selectContent())
-                site = site.replace("{{menu}}", ifLogged())
-                res.writeHead(200, { "Content-Type": "text/html" });
-                res.end(site);
+                selectContent().then(v => {
+                    site = site.replace('{{header}}',header())
+                    site = site.replace('{{footer}}',footer())
+                    site = site.replace("{{title}}", "Login")
+                    site = site.replace("{{menu}}", ifLogged());
+                    site = site.replace("{{select}}", v);
+                    res.writeHead(200, { "Content-Type": "text/html" });
+                    res.end(site);
+                });
+                break;
                 break;
             }
-        case "register":
+        case "register": /* + */
             {
                 let site = fs.readFileSync("./views/registerPage.html").toString();
-                site = site.replace("{{menu}}", ifLogged())
-                res.writeHead(200, { "Content-Type": "text/html" });
-                res.end(site);
+                selectContent().then(v => {
+                    site = site.replace('{{header}}',header())
+                    site = site.replace('{{footer}}',footer())
+                    site = site.replace("{{title}}", "Register")
+                    site = site.replace("{{menu}}", ifLogged());
+                    site = site.replace("{{select}}", v);
+                    res.writeHead(200, { "Content-Type": "text/html" });
+                    res.end(site);
+                });
+
                 break;
             }
-        case "signUp": {
+        case "signUp": /* + */ {
             let formdata = "";
             req.on("data", (chunk) => {
                 formdata += chunk.toString();
@@ -135,7 +164,7 @@ let server = http.createServer(async (req, res) => {
             });
             break;
         }
-        case "signIn": {
+        case "signIn": /* + */ {
             let formdata = "";
             console.log("ssss")
             req.on("data", (chunk) => {
@@ -163,7 +192,7 @@ let server = http.createServer(async (req, res) => {
                             userID = result[0].user_id;
                             let site = fs.readFileSync("./views/loginPage.html").toString();
                             site = site.replace("{{modal}}", '<script>alert("Successfully log!")</script>');
-                            site = site.replace("{{menu}}",ifLogged());
+                            site = site.replace("{{menu}}", ifLogged());
                             res.writeHead(200, { "Content-Type": "text/html" });
                             res.end(site);
                         }
@@ -176,69 +205,69 @@ let server = http.createServer(async (req, res) => {
             let site = fs.readFileSync("./views/productsListPage.html").toString();
             if (req.method == 'POST') {
                 var body = '';
-        
+
                 req.on('data', function (data) {
                     body += data;
                 });
-            
-            req.on("end", () => {
-                var text = ""
-                var post = parser.parse(body);
-                var cat = ""
-                connection.connect((err) => {
-                    let query_selectCategory =""
-                    if(post['category'] == "all")
-                    {
-                        query_selectCategory = "select product_name, product_price, product_description, product_image from products";
-                        cat = "All categories"
-                    }
-                    else
-                    {
-                        cat = post['category'];
-                        query_selectCategory = "select product_name, product_price, product_description, product_image from products where product_category = '" + post['category'] + "'";
-                    }
-                   
-                    console.log(query_selectCategory)
-                    connection.query(query_selectCategory, (err, result, fields) => {
 
-                        var index = 1;
-                        text = '<div class="row center-mobile" style="margin-top: 50px">'
-                        result.forEach(element => {
+                req.on("end", () => {
+                    var text = ""
+                    var post = parser.parse(body);
+                    var cat = ""
+                    connection.connect((err) => {
+                        let query_selectCategory = ""
+                        if (post['category'] == "all") {
+                            query_selectCategory = "select product_name, product_price, product_description, product_image from products";
+                            cat = "All categories"
+                        }
+                        else {
+                            cat = post['category'];
+                            query_selectCategory = "select product_name, product_price, product_description, product_image from products where product_category = '" + post['category'] + "'";
+                        }
 
-                            text += '<div class="col"><div class="card center-mobile" style="width: 18rem;"><img src="/images/' + element.product_image + '" class="card-img-top" style="padding: 15px" alt="..."><div class="card-body"><h5 class="card-title">' + element.product_name + '</h5><p class="card-text">' + element.product_description + '</p><a href="addToBusket" class="btn btn-primary">Add to cart</a><p style="float:right; margin-right: 40px;">' + element.product_price + '</p></div></div></div>';
-                            index++;
-                            if (index == 6) {
-                                text += '</div><div class="row center-mobile" style="margin-top: 50px">'
-                                index = 1;
-                            }
-                        });
-                        text += '</div>'
-                        selectContent().then(v => {
-                            site = site.replace("{{menu}}", ifLogged())
-                            site = site.replace("{{category}}", cat);
+                        console.log(query_selectCategory)
+                        connection.query(query_selectCategory, (err, result, fields) => {
+
+                            var index = 1;
+                            text = '<div class="row center-mobile" style="margin-top: 50px">'
+                            result.forEach(element => {
+
+                                text += '<div class="col"><div class="card center-mobile" style="width: 18rem;"><img src="/images/' + element.product_image + '" class="card-img-top" style="padding: 15px" alt="..."><div class="card-body"><h5 class="card-title">' + element.product_name + '</h5><p class="card-text">' + element.product_description + '</p><a href="addToBusket" class="btn btn-primary">Add to cart</a><p style="float:right; margin-right: 40px;">' + element.product_price + '</p></div></div></div>';
+                                index++;
+                                if (index == 6) {
+                                    text += '</div><div class="row center-mobile" style="margin-top: 50px">'
+                                    index = 1;
+                                }
+                            });
+                            text += '</div>'
                             site = site.replace("{{cards}}", text);
-                            
-                            site = site.replace("{{select}}", v);
-                            res.writeHead(200, { "Content-Type": "text/html" });
-                            res.end(site);
-                        })
+                            selectContent().then(v => {
+                                site = site.replace('{{header}}',header())
+                                site = site.replace('{{footer}}',footer())
+                                site = site.replace("{{title}}", "Products")
+                                site = site.replace("{{category}}", cat);
+                                site = site.replace("{{menu}}", ifLogged());
+                                site = site.replace("{{select}}", v);
+                                res.writeHead(200, { "Content-Type": "text/html" });
+                                res.end(site);
+                            });
+                        });
                     });
                 });
-            });}
+            }
             break;
         }
         case "products": {
-
             let site = fs.readFileSync("./views/productsListPage.html").toString();
             let text = "";
             connection.connect((err) => {
                 let query_selectProducts = "select product_id, product_name, product_price, product_description, product_image from products";
                 connection.query(query_selectProducts, (err, result, fields) => {
                     var index = 1;
-                    text = '<div class="row center-mobile" style="margin-top: 50px">'
+                    text = '<br><div class="row center-mobile" style="margin-top: 50px; display:flex;">'
                     result.forEach(element => {
 
-                        text += '<div class="col"><div class="card center-mobile" style="width: 18rem;"><img src="/images/' + element.product_image + '" class="card-img-top" style="padding: 15px" alt="..."><div class="card-body"><h5 class="card-title">' + element.product_name + '</h5><p class="card-text">' + element.product_description + '</p><a href="" id="'+element.product_id+'" class="btn btn-primary">Add to cart</a><p style="float:right; margin-right: 40px;">' + element.product_price + '</p></div></div></div>';
+                        text += '<div class="col"><div class="card center-mobile" style="margin-top: 50px;width: 18rem;"><img src="/images/' + element.product_image + '" class="card-img-top" style="padding: 15px" alt="..."><div class="card-body"><h5 class="card-title">' + element.product_name + '</h5><p class="card-text">' + element.product_description + '</p><a href="/addToBusket/'+element.product_id+'" id="' + element.product_id + '" class="btn btn-primary">Add to cart</a><p style="float:right; margin-right: 40px;">' + element.product_price + '</p></div></div></div>';
                         index++;
                         if (index == 6) {
                             text += '</div><div class="row center-mobile" style="margin-top: 50px">'
@@ -248,53 +277,127 @@ let server = http.createServer(async (req, res) => {
                     text += '</div>'
                     site = site.replace("{{cards}}", text);
                     selectContent().then(v => {
-                        site = site.replace("{{category}}", "All categories");
+                        site = site.replace('{{header}}',header())
+                        site = site.replace('{{footer}}',footer())
+                        site = site.replace("{{title}}", "Products")
+                        site = site.replace("{{menu}}", ifLogged());
                         site = site.replace("{{select}}", v);
-                        site = site.replace("{{menu}}", ifLogged())
                         res.writeHead(200, { "Content-Type": "text/html" });
                         res.end(site);
-                    })
+                    });
 
                 });
             });
 
             break;
         }
-        case "delivery": { }
-        case "contact": { }
-        case "about_us": {
-            let site = fs.readFileSync("./views/aboutUsPage.html").toString();
-            site = site.replace("{{select}}",selectContent())
-            site = site.replace("{{menu}}", ifLogged())
-            res.writeHead(200, { "Content-Type": "text/html" });
-            res.end(site);
+        case "search": /* + */  {
+            let site = fs.readFileSync("./views/searchResult.html").toString();
+            if (req.method == 'POST') {
+                var body = '';
+                req.on('data', function (data) {
+                    body += data;
+                });
+                req.on("end", () => {
+                    var text = ""
+                    var post = parser.parse(body);
+                    connection.connect((err) => {
+                        let query_searchSelect = "select product_id, product_name, product_price, product_description, product_image from products where product_name = '"+post['search']+"'";
+                        connection.query(query_searchSelect, (err, result, fields) => {
+                            if(result.length == 0){
+                                text = " <h3 class=\"filter\">There are no products with this name</h3>"
+                            }else
+                            {
+                                var index = 1;
+                                text = '<div class="row center-mobile" style="margin-top: 50px">'
+                                result.forEach(element => {
+    
+                                text += '<div class="col"><div class="card center-mobile" style="width: 18rem;"><img src="/images/' + element.product_image + '" class="card-img-top" style="padding: 15px" alt="..."><div class="card-body"><h5 class="card-title">' + element.product_name + '</h5><p class="card-text">' + element.product_description + '</p><a href="" id="' + element.product_id + '" class="btn btn-primary">Add to cart</a><p style="float:right; margin-right: 40px;">' + element.product_price + '</p></div></div></div>';
+                                index++;
+                                if (index == 6) {
+                                    text += '</div><div class="row center-mobile" style="margin-top: 50px">'
+                                    index = 1;
+                                }
+                                });
+                                text += '</div>'
+                            }
+                           
+                            site = site.replace("{{cards}}", text);
+                            selectContent().then(v => {
+                                site = site.replace('{{header}}',header())
+                                site = site.replace('{{footer}}',footer())
+                                site = site.replace("{{title}}", "Search result")
+                                site = site.replace("{{menu}}", ifLogged());
+                                site = site.replace("{{select}}", v);
+                                res.writeHead(200, { "Content-Type": "text/html" });
+                                res.end(site);
+                            });
+                        });
+                    });
+                });
+            }
             break;
-         }
-        case "images":
-            {
+        }
+        case "delivery": /* + */  {
+            let site = fs.readFileSync("./views/deliveryPage.html").toString();
+            selectContent().then(v => {
+                site = site.replace('{{header}}',header())
+                site = site.replace('{{footer}}',footer())
+                site = site.replace("{{title}}", "Delivery")
+                site = site.replace("{{menu}}", ifLogged());
+                site = site.replace("{{select}}", v);
+                res.writeHead(200, { "Content-Type": "text/html" });
+                res.end(site);
+            });
+            break;
+        }
+        case "contact": /* + */ {
+            let site = fs.readFileSync("./views/contactPage.html").toString();
+            selectContent().then(v => {
+                site = site.replace('{{header}}',header())
+                site = site.replace('{{footer}}',footer())
+                site = site.replace("{{title}}", "Contact")
+                site = site.replace("{{menu}}", ifLogged());
+                site = site.replace("{{select}}", v);
+                res.writeHead(200, { "Content-Type": "text/html" });
+                res.end(site);
+            });
+            break;
+        }
+        case "about_us": /* + */ {
+            let site = fs.readFileSync("./views/aboutUsPage.html").toString();
+            selectContent().then(v => {
+                site = site.replace('{{header}}',header())
+                site = site.replace('{{footer}}',footer())
+                site = site.replace("{{title}}", "About us")
+                site = site.replace("{{menu}}", ifLogged());
+                site = site.replace("{{select}}", v);
+                res.writeHead(200, { "Content-Type": "text/html" });
+                res.end(site);
+            });
+            break;
+        }
+        case "images": /* + */ {
                 console.log(url[1]);
                 let file_extension = url[1].split('.');
                 console.log(file_extension)
-                if(file_extension[1]=="jpg")
-                {
+                if (file_extension[1] == "jpg") {
                     let image = fs.readFileSync("./images/" + url[1]);
                     res.writeHead(200, { "Content-Type": "image/jpeg" });
                     res.end(image, 'binary');
                     break;
-                }else
-                {
+                } else {
                     let image = fs.readFileSync("./images/" + url[1]);
                     res.writeHead(200, { "Content-Type": "image/png" });
                     res.end(image, 'binary');
                     break;
                 }
-               
+
             }
-        // case "addToBusket":
-        //     {
-                
-        //         basket.push(this.product_id)
-        //     }
+        case "addToBusket": {
+                // url[0] - addtobusket
+                //url [1] - element id 
+            }
         default: {
             let site = fs.readFileSync("./views/error.html");
             res.writeHead(200, { "Content-Type": "text/html" });

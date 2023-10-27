@@ -2,7 +2,7 @@
     display: flex;
   }
 
-  body {
+ body {
     overflow-y: scroll;
     background-color: rgb(248, 249, 250);
   }
@@ -39,4 +39,36 @@
     border: 1px solid black;
     padding: 5%;
 
+  }
+  .center-mobile{
+    margin-top: 50px;
+  }
+  @media (max-width: 666px){
+  .center-mobile{
+
+      margin: 0 auto; 
+  }
+  }
+
+  .center-mobile1{
+    margin-top: -50px;
+  }
+  @media (max-width: 990px){
+  .center-mobile1{
+      margin-top: 0;
+  }
+  }
+  .filter{
+   
+      margin-left: 5%;
+      margin-top: 2%;
+    
+  }
+  #container1
+  {
+    width: 90vw;
+  }
+  .col
+  {
+    margin-top: 50px;
   }
