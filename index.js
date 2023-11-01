@@ -76,8 +76,15 @@ let server = http.createServer(async (req, res) => {
             logStatus = 0
             let site = fs.readFileSync("./views/index.html").toString();
             site = site.replace("{{menu}}", '<script>alert("Logged out successfully")</script><div class="login"><a class="nav-link" href="login" style="margin: 5px; ">Sign in</a><a class="nav-link" href="register" style="margin: 5px;">Sign up</a></div>');
-            res.writeHead(200, { "Content-Type": "text/html" });
-            res.end(site);
+            selectContent().then(v => {
+                site = site.replace('{{header}}',header())
+                site = site.replace('{{footer}}',footer())
+                site = site.replace("{{title}}", "Home")
+                site = site.replace("{{menu}}", "<script>alert('Logged out successfully')</script>" + ifLogged());
+                site = site.replace("{{select}}", v);
+                res.writeHead(200, { "Content-Type": "text/html" });
+                res.end(site);
+            });
             break;
         }
         case "style.css": /* + */ {
@@ -98,7 +105,7 @@ let server = http.createServer(async (req, res) => {
                     res.end(site);
                 });
                 break;
-                break;
+
             }
         case "register": /* + */
             {
@@ -140,11 +147,18 @@ let server = http.createServer(async (req, res) => {
                                 let sql_insert = "insert users values ('', '" + parsed.login + "', '" + parsed.password + "');"
                                 connection.query(sql_insert, (err, result, fields) => {
                                     if (result) {
-                                        res.writeHead(200, { "Content-Type": "text/html" });
-                                        let site = fs.readFileSync("./views/registerPage.html").toString();
-                                        site = site.replace("{{modal}}", '<script>alert("Successfully registered!\nNow you can log in")</script>')
-                                        site = site.replace("{{menu}}", ifLogged())
-                                        res.end(site);
+                                        selectContent().then(v => {
+                                            site = site.replace('{{header}}',header())
+                                            site = site.replace('{{footer}}',footer())
+                                            site = site.replace("{{title}}", "Login")
+                                            site = site.replace("{{menu}}", ifLogged());
+                                            site = site.replace("{{select}}", v);
+                                            site = site.replace("{{modal}}", '<script>alert("Successfully registered!\nNow you can log in")</script>')
+                                            res.writeHead(200, { "Content-Type": "text/html" });
+                                            res.end(site);
+                                        });
+                                        
+                                        
                                     }
                                 });
 
@@ -152,9 +166,17 @@ let server = http.createServer(async (req, res) => {
                             else {
                                 res.writeHead(200, { "Content-Type": "text/html" });
                                 let site = fs.readFileSync("./views/registerPage.html").toString();
-                                site = site.replace("{{menu}}", ifLogged())
-                                site = site.replace("{{modal}}", '<script>alert("Username already exists!")</script>')
-                                res.end(site);
+                                selectContent().then(v => {
+                                    site = site.replace('{{header}}',header())
+                                    site = site.replace('{{footer}}',footer())
+                                    site = site.replace("{{title}}", "Login")
+                                    site = site.replace("{{menu}}", ifLogged());
+                                    site = site.replace("{{select}}", v);
+                                    site = site.replace("{{modal}}", '<script>alert("Username already exists!")</script>')
+                                    res.writeHead(200, { "Content-Type": "text/html" });
+                                    res.end(site);
+                                });
+                                
                             }
 
 
@@ -183,25 +205,40 @@ let server = http.createServer(async (req, res) => {
                         if (result[0].howmany == 0) {
 
                             let site = fs.readFileSync("./views/loginPage.html").toString();
-                            site = site.replace("{{modal}}", '<script>alert("Incorrect login details!")</script>');
-                            res.writeHead(200, { "Content-Type": "text/html" });
-                            res.end(site);
+                            
+                            selectContent().then(v => {
+                                site = site.replace('{{header}}',header())
+                                site = site.replace('{{footer}}',footer())
+                                site = site.replace("{{title}}", "Login")
+                                site = site.replace("{{menu}}", ifLogged());
+                                site = site.replace("{{select}}", v);
+                                site = site.replace("{{modal}}", '<script>alert("Incorrect login details!")</script>');
+                                res.writeHead(200, { "Content-Type": "text/html" });
+                                res.end(site);
+                            });
+                           
                         }
                         else {
                             logStatus = 1;
                             userID = result[0].user_id;
-                            let site = fs.readFileSync("./views/loginPage.html").toString();
-                            site = site.replace("{{modal}}", '<script>alert("Successfully log!")</script>');
-                            site = site.replace("{{menu}}", ifLogged());
-                            res.writeHead(200, { "Content-Type": "text/html" });
-                            res.end(site);
+                            let site = fs.readFileSync("./views/loginPage.html").toString(); 
+                            selectContent().then(v => {
+                                site = site.replace('{{header}}',header())
+                                site = site.replace('{{footer}}',footer())
+                                site = site.replace("{{title}}", "Login")
+                                site = site.replace("{{menu}}", ifLogged());
+                                site = site.replace("{{select}}", v);
+                                site = site.replace("{{modal}}", '<script>alert("Successfully log!")</script>');
+                                res.writeHead(200, { "Content-Type": "text/html" });
+                                res.end(site);
+                            });
                         }
                     });
                 });
             })
             break;
         }
-        case "category": {
+        case "category": /* + */ {
             let site = fs.readFileSync("./views/productsListPage.html").toString();
             if (req.method == 'POST') {
                 var body = '';
@@ -216,7 +253,7 @@ let server = http.createServer(async (req, res) => {
                     var cat = ""
                     connection.connect((err) => {
                         let query_selectCategory = ""
-                        if (post['category'] == "all") {
+                        if (post['category'] == "all" || post['category'] == "") {
                             query_selectCategory = "select product_name, product_price, product_description, product_image from products";
                             cat = "All categories"
                         }
@@ -225,15 +262,27 @@ let server = http.createServer(async (req, res) => {
                             query_selectCategory = "select product_name, product_price, product_description, product_image from products where product_category = '" + post['category'] + "'";
                         }
 
-                        console.log(query_selectCategory)
+                        // console.log(query_selectCategory)
                         connection.query(query_selectCategory, (err, result, fields) => {
 
                             var index = 1;
                             text = '<div class="row center-mobile" style="margin-top: 50px">'
                             result.forEach(element => {
 
-                                text += '<div class="col"><div class="card center-mobile" style="width: 18rem;"><img src="/images/' + element.product_image + '" class="card-img-top" style="padding: 15px" alt="..."><div class="card-body"><h5 class="card-title">' + element.product_name + '</h5><p class="card-text">' + element.product_description + '</p><a href="addToBusket" class="btn btn-primary">Add to cart</a><p style="float:right; margin-right: 40px;">' + element.product_price + '</p></div></div></div>';
-                                index++;
+                                text += '<div class="col"><div class="card center-mobile" style="width: 18rem;"><img src="/images/' + element.product_image + '" class="card-img-top" style="padding: 15px" alt="..."><div class="card-body"><h5 class="card-title">' + element.product_name + '</h5><p class="card-text">' + element.product_description + '</p>'
+                                if(logStatus == 1)
+                                {
+                                    text+='<a href="/addToBusket/'+element.product_id+'" class="btn btn-primary">Add to cart</a><p style="float:right; margin-right: 40px;">' + element.product_price + '</p></div></div></div>';
+                                    index++;
+                                }else
+                                {
+                                    text+='<p style="float:right; margin-right: 40px;">' + element.product_price + '</p></div></div></div>';
+                                    index++;
+                                }
+                                
+                                
+                                
+                                
                                 if (index == 6) {
                                     text += '</div><div class="row center-mobile" style="margin-top: 50px">'
                                     index = 1;
@@ -257,7 +306,7 @@ let server = http.createServer(async (req, res) => {
             }
             break;
         }
-        case "products": {
+        case "products": /* + */ {
             let site = fs.readFileSync("./views/productsListPage.html").toString();
             let text = "";
             connection.connect((err) => {
@@ -267,8 +316,20 @@ let server = http.createServer(async (req, res) => {
                     text = '<br><div class="row center-mobile" style="margin-top: 50px; display:flex;">'
                     result.forEach(element => {
 
-                        text += '<div class="col"><div class="card center-mobile" style="margin-top: 50px;width: 18rem;"><img src="/images/' + element.product_image + '" class="card-img-top" style="padding: 15px" alt="..."><div class="card-body"><h5 class="card-title">' + element.product_name + '</h5><p class="card-text">' + element.product_description + '</p><a href="/addToBusket/'+element.product_id+'" id="' + element.product_id + '" class="btn btn-primary">Add to cart</a><p style="float:right; margin-right: 40px;">' + element.product_price + '</p></div></div></div>';
-                        index++;
+                        text += '<div class="col"><div class="card center-mobile" style="width: 18rem;"><img src="/images/' + element.product_image + '" class="card-img-top" style="padding: 15px" alt="..."><div class="card-body"><h5 class="card-title">' + element.product_name + '</h5><p class="card-text">' + element.product_description + '</p>'
+                        if(logStatus == 1)
+                        {
+                            text+='<a href="/addToBusket/'+element.product_id+'" class="btn btn-primary">Add to cart</a><p style="float:right; margin-right: 40px;">' + element.product_price + '</p></div></div></div>';
+                            index++;
+                        }else
+                        {
+                            text+='<p style="float:right; margin-right: 40px;">' + element.product_price + '</p></div></div></div>';
+                            index++;
+                        }
+                        
+                        
+                        
+                        
                         if (index == 6) {
                             text += '</div><div class="row center-mobile" style="margin-top: 50px">'
                             index = 1;
@@ -281,6 +342,7 @@ let server = http.createServer(async (req, res) => {
                         site = site.replace('{{footer}}',footer())
                         site = site.replace("{{title}}", "Products")
                         site = site.replace("{{menu}}", ifLogged());
+                        site = site.replace("{{category}}", "All categories");
                         site = site.replace("{{select}}", v);
                         res.writeHead(200, { "Content-Type": "text/html" });
                         res.end(site);
@@ -397,7 +459,57 @@ let server = http.createServer(async (req, res) => {
         case "addToBusket": {
                 // url[0] - addtobusket
                 //url [1] - element id 
-            }
+                console.log(url)
+                basket.push(url[1])
+                let text = "";
+                let site = fs.readFileSync("./views/productsListPage.html").toString();
+                connection.connect((err) =>{
+                    basket.forEach(element =>{
+                        let query_basketSelect = "select product_id, product_name, product_price, product_description, product_image from products where product_id = "+element
+                        connection.query(query_basketSelect, (err, result, field) => {
+                            console.log(result); console.log(basket.length)
+                        });
+                    }); 
+                })
+                connection.connect((err) => {
+                    let query_selectProducts = "select product_id, product_name, product_price, product_description, product_image from products";
+                    connection.query(query_selectProducts, (err, result, fields) => {
+                        var index = 1;
+                        text = '<br><div class="row center-mobile" style="margin-top: 50px; display:flex;">'
+                        result.forEach(element => {
+    
+                            text += '<div class="col"><div class="card center-mobile" style="width: 18rem;"><img src="/images/' + element.product_image + '" class="card-img-top" style="padding: 15px" alt="..."><div class="card-body"><h5 class="card-title">' + element.product_name + '</h5><p class="card-text">' + element.product_description + '</p>'
+                            if(logStatus == 1)
+                            {
+                                text+='<a href="/addToBusket/'+element.product_id+'" class="btn btn-primary">Add to cart</a><p style="float:right; margin-right: 40px;">' + element.product_price + '</p></div></div></div>';
+                                index++;
+                            }else
+                            {
+                                text+='<p style="float:right; margin-right: 40px;">' + element.product_price + '</p></div></div></div>';
+                                index++;
+                            }
+                            if (index == 6) {
+                                text += '</div><div class="row center-mobile" style="margin-top: 50px">'
+                                index = 1;
+                            }
+                        });
+                        text += '</div>'
+                        site = site.replace("{{cards}}", text);
+                        selectContent().then(v => {
+                            site = site.replace('{{header}}',header())
+                            site = site.replace('{{footer}}',footer())
+                            site = site.replace("{{title}}", "Products")
+                            site = site.replace("{{menu}}", ifLogged());
+                            site = site.replace("{{alert}}", "<script>alert('Successfully add!')</script>")
+                            site = site.replace("{{category}}", "All categories");
+                            site = site.replace("{{select}}", v);
+                            res.writeHead(200, { "Content-Type": "text/html" });
+                            res.end(site);
+                        });
+                    })
+                })
+            break;
+        }
         default: {
             let site = fs.readFileSync("./views/error.html");
             res.writeHead(200, { "Content-Type": "text/html" });
