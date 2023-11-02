@@ -492,8 +492,7 @@ let server = http.createServer(async (req, res) => {
                 })
             })
             break;
-        }
-        
+        }   
         case "placeOrder": {
                 /* 
                     podsumowanie (dodawanie zamówienia do bazy)
