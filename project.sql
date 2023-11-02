@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Paź 25, 2023 at 08:56 PM
+-- Generation Time: Lis 02, 2023 at 08:47 AM
 -- Wersja serwera: 10.4.28-MariaDB
 -- Wersja PHP: 8.2.4
 
@@ -20,6 +20,22 @@ SET time_zone = "+00:00";
 --
 -- Database: `project`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Struktura tabeli dla tabeli `orders`
+--
+
+CREATE TABLE `orders` (
+  `order_id` int(11) NOT NULL,
+  `order_user_id` int(11) NOT NULL,
+  `order_user_fname` varchar(50) NOT NULL,
+  `order_user_lname` varchar(50) NOT NULL,
+  `order_user_address` varchar(150) NOT NULL,
+  `order_payment` varchar(50) NOT NULL,
+  `order_details` varchar(300) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -85,6 +101,12 @@ INSERT INTO `users` (`user_id`, `user_login`, `user_password`) VALUES
 --
 
 --
+-- Indeksy dla tabeli `orders`
+--
+ALTER TABLE `orders`
+  ADD PRIMARY KEY (`order_id`);
+
+--
 -- Indeksy dla tabeli `products`
 --
 ALTER TABLE `products`
@@ -99,6 +121,12 @@ ALTER TABLE `users`
 --
 -- AUTO_INCREMENT for dumped tables
 --
+
+--
+-- AUTO_INCREMENT for table `orders`
+--
+ALTER TABLE `orders`
+  MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT for table `products`

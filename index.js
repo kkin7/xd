@@ -6,6 +6,7 @@ const { resolve } = require("path");
 var logStatus = 0; // 1 log, 0 logout
 var userID = 0;
 var basket = [];
+let basket_sum = 0.0
 const connection = mysql.createConnection({
     host: "localhost",
     user: "root",
@@ -497,6 +498,7 @@ let server = http.createServer(async (req, res) => {
                 /* 
                     podsumowanie (dodawanie zamówienia do bazy)
                 */
+            site = fs.readFileSync("./views/orderDetails.html").toString()
             if (req.method == 'POST') {
                 var body = '';
 
@@ -506,18 +508,49 @@ let server = http.createServer(async (req, res) => {
 
                 req.on("end", () => {
                     var text = ""
+                    let payment = ""
+                    let deliveryPrice = 0
                     var post = parser.parse(body);
                     connection.connect((err) => {
+                        let products = "items id: "
+                        let sum = basket_sum
+                        let address = post.address1 + " " + post.address2 + " " + post.city
+                        
+                        basket.forEach(el => {
+                            products += el+";"
+                        });
+                        
+                        if(post.flexRadioDefault.value == 14.99)
+                        {
+                            payment = "Cash on delivery"
+                            deliveryPrice = 14.99
+                            sum += 14.99
+                        }
+                             
+                        else{
+                            payment = "online payment"
+                            deliveryPrice = 9.99
+                            sum += 9.99
+                        }
+                            
+                        products+= " Total price:" +sum
+                        let query_insertOrder = "insert into orders values('',"+userID+",'"+post.fname+"','"+post.lName+"','"+address+"','"+payment+"','"+products+"')"
+                        connection.query(query_insertOrder, (err, result, fields)=>{
 
-
-                        text += '</div>'
-                        site = site.replace("{{cards}}", text);
+                        })
+                        let query_orderid = "select order_id from orders order by order_id DESC limit 1"
+                        connection.query(query_orderid, (err, result, fields) => {
+                            text = "number: " +result[0].order_id 
+                        })
                         selectContent().then(v => {
+                        
+                        let total = '<div class="card text-bg-secondary mb-3" style="width: 18rem; margin: 0 auto;"><div class="card-header">Basket price: ' + basket_sum + '<br>Delivery price: '+deliveryPrice+'</div><div class="card-body"><h5 class="card-title">Order price: ' + sum + '</h5></div></div>'
                             site = site.replace('{{header}}', header())
                             site = site.replace('{{footer}}', footer())
-                            site = site.replace("{{title}}", "Products")
-                            site = site.replace("{{category}}", cat);
+                            site = site.replace("{{title}}", "Order details")
                             site = site.replace("{{menu}}", ifLogged());
+                            site = site.replace("{{ordId}}", text)
+                            site = site.replace("{{total}}", total)
                             site = site.replace("{{select}}", v);
                             res.writeHead(200, { "Content-Type": "text/html" });
                             res.end(site);
@@ -568,6 +601,7 @@ let server = http.createServer(async (req, res) => {
                         site = site.replace('{{footer}}', footer())
                         site = site.replace("{{title}}", "Basket")
                         site = site.replace("{{cards}}", text)
+                        basket_sum = sum
                         // site = site.replace("{{category}}", cat);
                         site = site.replace("{{summary}}", summary)
                         site = site.replace("{{menu}}", ifLogged());
@@ -594,6 +628,7 @@ let server = http.createServer(async (req, res) => {
 
                 selectContent().then(v => {
                     summary = '<div class="card text-bg-secondary mb-3" style="max-width: 18rem;"><div class="card-header">Basket price: ' + sum + '<br>Delivery price: ?.??</div><div class="card-body"><h5 class="card-title">Order price: ' + sum + '</h5><a href="/order" class="btn btn-primary">Go to shipping method</a></div></div>'
+                    basket_sum = sum
                     site = site.replace('{{header}}', header())
                     site = site.replace('{{footer}}', footer())
                     site = site.replace("{{title}}", "Basket")
