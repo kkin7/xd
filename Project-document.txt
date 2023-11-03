@@ -1,0 +1,31 @@
+/** 
+    @header         Funkcja do wyświetlania menu na stronach html
+    @footer         Funkcja do wyświetlania footera na stronach html
+    @selectContent  Funkcja do pobierania z bazy kategorii prodówktów i dodaawnia ich do selecta
+    @ifLogged       Funkcja do sprawdzania czy użytkownik jest zalogowany i wyświetlania odpowiedniego menu w zależności od wyniku
+    
+
+
+
+*/
+
+/ - wyświetla stronę główną
+/logout - wylogowuje użytkownika i przenosi na stronę główną
+/login - wyświetla formularz logowania
+/register - wyświetla formularz rejestracji
+/singUp - obsługuje zapytanie rejestrujące użytkownika
+/singIn - obsługuje zapytanie logujące użytkownika
+/category - wyświetla produkty o wybranej kategorii
+/products - wyświetla wszystkie produkty
+/search - wyświetla produkty o nazwie podanej przez użytkownika
+/delivery - wyświetla stronę o sposobach dostawy
+/contact - wyświetla stronę z informacjami kontaktowymi
+/about_us - wyświetla stronę z informacjami o firmie
+/images/:imagesname - zwraca zdjęcie o podanej nazwie 
+/addToBasket/:productID - dodaje dany produkt do koszyka
+/placeOrder - obsługuje dodanie zamówienia do bazy oraz wyświetla podsumowanie zamówienia
+/order - wyświetla formularz z danymi do wysyłki
+/DeleteFromBasket/:productID - usuwa podany przedmiot z koszyka
+/basket - wyświetla zawartość koszyka
+
+domyślnym responsem jest 404

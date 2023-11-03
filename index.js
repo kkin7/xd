@@ -645,7 +645,7 @@ let server = http.createServer(async (req, res) => {
         }
         default: {
             let site = fs.readFileSync("./views/error.html");
-            res.writeHead(200, { "Content-Type": "text/html" });
+            res.writeHead(404, { "Content-Type": "text/html" });
             res.end(site);
             break;
         }
